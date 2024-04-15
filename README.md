@@ -3,7 +3,7 @@ Algorytm programowania rozproszonego do umawiania się zwierząt na imprezę
 
 każdy proces wie o Z zajączków o N niedźwiedi i liście P polan o pojemniości S gdzie niedźwiedź to 4 zajączki
 
-załorzenia P * (S - 1) < Z
+założenia P * (S - 1) < Z
 
 każda polana ma:
 sekcję krytyczną z S miejscami
@@ -11,9 +11,9 @@ sekca krytyczna 1 miejscowa (kto przynosi alkohol dla niedzwiedzi)
 
 
 ## Struktury i zmienne:
-1. **ilość zajączków** - Z
-2. **ilość niedźwiedzi** - N
-3. **ilość polan** - P
+1. **liczba zajączków** - Z
+2. **liczba niedźwiedzi** - N
+3. **liczba polan** - P
 4. **pojemność każdej polany** - S
 5. każdy proces lista Px[]- na itej polanie są te indexy
 
