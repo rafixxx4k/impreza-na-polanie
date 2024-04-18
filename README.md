@@ -1,7 +1,7 @@
 # impreza-na-polanie
 Algorytm programowania rozproszonego do umawiania się zwierząt na imprezę.
 
-W pewnym lesie żyje sobie spokojnie Z zajączków i N niedźwiedzi. Co pewien czas zajączki urządzają imprezy. W tym celu uzgadniają między sobą, na której z P nierozróżnialnych polan odbędzie się impreza. Na polanie zmieści się S zajączków, przy czym jeden niedźwiedź zajmuje tyle miejsca, co 4 zajączki.
+W pewnym lesie żyje sobie spokojnie *Z* zajączków i *N* niedźwiedzi. Co pewien czas zajączki urządzają imprezy. W tym celu uzgadniają między sobą, na której z *P* nierozróżnialnych polan odbędzie się impreza. Na polanie zmieści się *S* zajączków, przy czym jeden niedźwiedź zajmuje tyle miejsca, co 4 zajączki.
 
 Każdy zajączek przynosi na imprezę alkohol (to nie zasób, po prostu przed imprezą zajączek deklaruje, co przynosi)Jeżeli na imprezie pojawi się niedźwiedź, zajączki muszą zezwolić mu na picie na sępa, co oznacza, że muszą przynieść dodatkowy alkohol także dla misiów. Impreza z samymi niedźwiedziami nie może się odbyć, bo nie ma kto przynieść alkoholu.
 
@@ -10,7 +10,7 @@ Założenia:
 P * (S - 1) < Z
 ```
  
-Z rozszerzonej zasady szufladkowej Dirichleta, pewne jest, że jakaś impreza dojdzie do skutku, wtedy i tylk wtedy, gdy liczba zajączków jest większa od iloczynu liczby polan i pojemności polan pomniejszonej o 1.
+Z rozszerzonej zasady szufladkowej Dirichleta, pewne jest, że jakaś impreza dojdzie do skutku, wtedy i tylko wtedy, gdy liczba zajączków jest większa od iloczynu liczby polan i pojemności polan pomniejszonej o 1.
 
 
 
@@ -76,12 +76,12 @@ Algorytm dzielimy na trzy główne części: dostanie dostępu do żądanej pola
 ### Przynoszenie alkoholu
 ---
 - Zwierzę czeka w stanie **GLADE** do momenut zapełnienia się polany.
-- Gdy wykryje że lista zwierząt biorących udział w imprezie jest pełna wysyła do wszystkich uczestników wiadomość `ALCO`, zerują licznik `alco_count` i przechodzi do stanu **MOREALCO** 
+- Gdy wykryje że lista zwierząt biorących udział w imprezie jest pełna wysyła do wszystkich uczestników wiadomość `ALCO`, zerują licznik *alco_count* i przechodzi do stanu **MOREALCO** 
 - Reakcja na wiadomości:
     - `REQ`: dodaje do kolejki *Que*
     - `ACK`: ignoruje
     - `ALCO`: jeli pytanie odnosi się do danej polany odpowiada `OK` i przechodzi do stanu **SELFALCO**
-    - `ENTER`: zwiększenie licznika `enter_count`
+    - `ENTER`: zwiększenie licznika *enter_count*
     - każda inna wiadomość jest nie możliwa, więc ignorowana.  
 ---
 - W stanie **MOREALCO** są zwierzęta, które chcą zostać organizatorami imprezy, a zatem przynieść więcej alkoholu.
