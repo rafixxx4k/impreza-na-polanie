@@ -37,4 +37,4 @@ def print_with_color(clock, rank, message):
     colors = ["\u001b[38;5;" + str(i) + "m" for i in colors_id]
     reset_color = "\033[0m"
     color = colors[rank % len(colors)]
-    print(f"{color} {rank:03})  [{clock:05}t]: {message}{reset_color}")
+    print(f"{color} {rank:03})  [{clock:05}t]: {message}{reset_color}", flush=True)

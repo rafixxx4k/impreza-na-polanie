@@ -1,4 +1,4 @@
-def broadcast(comm, message, rank, size):
+def broadcast(comm, tag, clock, message, rank, size):
     """
     Broadcasts a message to all processes except the current rank.
 
@@ -11,6 +11,8 @@ def broadcast(comm, message, rank, size):
     Returns:
         None
     """
+    clock += 1
     for i in range(size):
         if i != rank:
-            comm.send(message, dest=i)
+            comm.send((clock, *message), dest=i, tag=tag)
+    return clock

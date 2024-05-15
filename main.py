@@ -4,6 +4,7 @@ import sys
 import time
 
 from constants import *
+
 import state_manager as sta
 
 comm = MPI.COMM_WORLD
@@ -24,15 +25,29 @@ animal_type = RABBIT if rank < Z else BEAR
 
 # Initial state
 state = REST
-args = [Z, N, P, S, rank, size, animal_type, -1]
+kwargs = {
+    "Z": Z,
+    "N": N,
+    "P": P,
+    "S": S,
+    "MPI": MPI,
+    "comm": comm,
+    "rank": rank,
+    "size": size,
+    "animal_type": animal_type,
+    "glad_id": None,
+    "request_id": 0,
+    "lamport_clock": 0,
+}
 state_functions = {
     REST: sta.rest,
     WAIT: sta.wait,
-    GLADE: sta.glade,
-    MOREALCO: sta.morealco,
-    SELFALCO: sta.selfalco,
+    # GLADE: sta.glade,
+    # MOREALCO: sta.morealco,
+    # SELFALCO: sta.selfalco,
 }
-sta.rest()
 while True:
-    state, *args = state_functions[state](args)
+    state, kwargs = state_functions[state](kwargs)
     MPI.COMM_WORLD.Barrier()
+    if state == GLADE:
+        break
