@@ -42,12 +42,12 @@ kwargs = {
 state_functions = {
     REST: sta.rest,
     WAIT: sta.wait,
-    # GLADE: sta.glade,
+    GLADE: sta.glade,
     # MOREALCO: sta.morealco,
     # SELFALCO: sta.selfalco,
 }
 while True:
     state, kwargs = state_functions[state](kwargs)
     MPI.COMM_WORLD.Barrier()
-    if state == GLADE:
+    if state == MOREALCO or state == SELFALCO:
         break
