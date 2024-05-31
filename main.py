@@ -38,6 +38,7 @@ kwargs = {
     "glad_id": None,
     "request_id": 0,
     "lamport_clock": 0,
+    "parties": [0 for _ in range(P)],
 }
 state_functions = {
     REST: sta.rest,

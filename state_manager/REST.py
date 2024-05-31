@@ -18,11 +18,6 @@ def rest(kwargs):
             )
             kwargs["lamport_clock"] = lamport_clock(kwargs["lamport_clock"], message[0])
             if status.Get_tag() == REQ:
-                print_with_color(
-                    kwargs["lamport_clock"],
-                    kwargs["rank"],
-                    f"get REQ from {status.Get_source()}, message is {message}",
-                )
                 kwargs["comm"].send(
                     (kwargs["lamport_clock"], message[1:]),
                     dest=status.Get_source(),
@@ -33,14 +28,26 @@ def rest(kwargs):
                     kwargs["rank"],
                     f"Sending ACK to {status.Get_source()}",
                 )
+
+            elif status.Get_tag() == ENTER:
+                nr_glade = message[1]
+                id_enter = status.Get_source()
+                kwargs["parties"][nr_glade] += 1 if id_enter < kwargs["Z"] else 4
+
+            elif status.Get_tag() == END:
+                nr_glade = message[1]
+                kwargs["parties"][nr_glade] = 0
+
+            # Ignore other messages
             else:
                 pass
+
         if random.random() < 0.1:
             kwargs["glade_id"] = random.randint(0, kwargs["P"] - 1)
             print_with_color(
                 kwargs["lamport_clock"],
                 kwargs["rank"],
-                f"i send REQ to all",
+                f"Sending REQ to all, parties = {kwargs['parties']}",
             )
             kwargs["lamport_clock"] = broadcast(
                 kwargs["comm"],

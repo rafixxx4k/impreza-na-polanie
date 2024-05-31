@@ -8,7 +8,7 @@ END = 6
 
 # types of animals
 RABBIT = 1
-BEAR = 2
+BEAR = 4
 
 # types of states
 REST = 1

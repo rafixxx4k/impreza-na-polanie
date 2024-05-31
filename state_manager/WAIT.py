@@ -12,12 +12,26 @@ def wait(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f"Entering WAIT. Count is {cnt}",
+        f'Entering WAIT for glade: {kwargs["glade_id"]}, parties: {kwargs["parties"]}',
     )
     queue = []
     own_priority = (kwargs["lamport_clock"], kwargs["rank"])
 
     while cnt < minimum_perimtions:
+        if kwargs["parties"][kwargs["glade_id"]] + kwargs["animal_type"] > kwargs["S"]:
+            print_with_color(
+                kwargs["lamport_clock"],
+                kwargs["rank"],
+                f"Back to REST state (Too many animals in the glade).",
+            )
+            for q in queue:
+                kwargs["comm"].send(
+                    (kwargs["lamport_clock"], *q["message"]),
+                    dest=q["sender"],
+                    tag=ACK,
+                )
+            return REST, kwargs
+
         if kwargs["comm"].Iprobe(
             source=kwargs["MPI"].ANY_SOURCE, tag=kwargs["MPI"].ANY_TAG, status=status
         ):
@@ -28,18 +42,11 @@ def wait(kwargs):
             kwargs["lamport_clock"] = lamport_clock(kwargs["lamport_clock"], message[0])
 
             if status.Get_tag() == REQ:
-                if (sender_priority > own_priority) and (
-                    message[1] == kwargs["glade_id"]
+                if (sender_priority < own_priority) or (
+                    message[1] != kwargs["glade_id"]
                 ):
-                    queue.append((status.Get_source(), message))
-                    print_with_color(
-                        kwargs["lamport_clock"],
-                        kwargs["rank"],
-                        f"Queuing REQ from {status.Get_source()}, {sender_priority},{own_priority}",
-                    )
-                else:
                     kwargs["comm"].send(
-                        (kwargs["lamport_clock"], message[1:]),
+                        (kwargs["lamport_clock"], *message[1:]),
                         dest=status.Get_source(),
                         tag=ACK,
                     )
@@ -48,17 +55,28 @@ def wait(kwargs):
                         kwargs["rank"],
                         f"Sending ACK to {status.Get_source()}",
                     )
+                else:
+                    queue.append(
+                        {"sender": status.Get_source(), "message": message[1:]}
+                    )
 
             elif status.Get_tag() == ACK:
-                if status.Get_source() < kwargs["Z"]:
-                    cnt += 1
-                else:
-                    cnt += 4
+                id_ack = status.Get_source()
+                cnt += 1 if id_ack < kwargs["Z"] else 4
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
                     f"Received ACK from {status.Get_source()}. Count is now {cnt}",
                 )
+
+            elif status.Get_tag() == ENTER:
+                nr_glade = message[1]
+                id_enter = status.Get_source()
+                kwargs["parties"][nr_glade] += 1 if id_enter < kwargs["Z"] else 4
+
+            elif status.Get_tag() == END:
+                nr_glade = message[1]
+                kwargs["parties"][nr_glade] = 0
 
             # Ignore other messages
             else:
@@ -67,7 +85,7 @@ def wait(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f"Enough permissions received. Entering GLADE",
+        f"Leaving WAIT state (Enough permissions received).",
     )
     kwargs["lamport_clock"] = broadcast(
         kwargs["comm"],

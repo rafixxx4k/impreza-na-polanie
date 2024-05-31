@@ -7,11 +7,12 @@ def glade(kwargs):
     MPI = kwargs["MPI"]
     comm = kwargs["comm"]
     status = MPI.Status()
-    # TODO
-    # probably we should pass it up to main an send ACKs once the party is over ???
-    queue = []
-    enter_count = 1 if kwargs["animal_type"] == RABBIT else 4
-    own_priority = (kwargs["lamport_clock"], kwargs["rank"])
+
+    print_with_color(
+        kwargs["lamport_clock"],
+        kwargs["rank"],
+        f'Entering GLADE {kwargs["glade_id"]}, {kwargs["parties"]}',
+    )
 
     while True:
         if comm.Iprobe(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status):
@@ -23,128 +24,66 @@ def glade(kwargs):
             kwargs["lamport_clock"] = lamport_clock(kwargs["lamport_clock"], message[0])
 
             # Parsing REQ message
-            if status.Get_tag() == REQ:
+            if (status.Get_tag() == REQ) and (message[1] != kwargs["glade_id"]):
+                comm.send(
+                    (kwargs["lamport_clock"], message[1:]),
+                    dest=status.Get_source(),
+                    tag=ACK,
+                )
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"get REQ from {status.Get_source()}, message is {message}",
+                    f"Sending ACK to {status.Get_source()}",
                 )
 
-                # TODO
-                # wondering if i should send ACK to other animals entering NOT my glade
-                if message[1] != kwargs["glade_id"]:
-                    comm.send(
-                        (kwargs["lamport_clock"], message[1:]),
-                        dest=status.Get_source(),
-                        tag=ACK,
-                    )
-                    print_with_color(
-                        kwargs["lamport_clock"],
-                        kwargs["rank"],
-                        f"Sending ACK to {status.Get_source()}",
-                    )
-                else:
-                    queue.append((status.Get_source(), message))
-                    print_with_color(
-                        kwargs["lamport_clock"],
-                        kwargs["rank"],
-                        f"Queuing REQ from {status.Get_source()}",
-                    )
-
-            # Parsing ALCO message
-            elif status.Get_tag() == ALCO:
+            elif (status.Get_tag() == ALCO) and (message[1] == kwargs["glade_id"]):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
                     f"get ALCO from {status.Get_source()}, message is {message}",
                 )
 
-                if message[1] == kwargs["glade_id"]:
-
-                    # I am a BEAR
-                    if kwargs["animal_type"] == BEAR:
-                        comm.send(
-                            (kwargs["lamport_clock"], message[1:]),
-                            dest=status.Get_source(),
-                            tag=OK,
-                        )
-                        print_with_color(
-                            kwargs["lamport_clock"],
-                            kwargs["rank"],
-                            f"Sending OK to {status.Get_source()}",
-                        )
-                        print_with_color(
-                            kwargs["lamport_clock"],
-                            kwargs["rank"],
-                            f"Leaving GLADE state",
-                        )
-                        state = SELFALCO
-                        return state, kwargs
-
-                    # I am a RABBIT
-                    else:
-                        # sender is a BEAR
-                        if status.Get_source() >= kwargs["Z"]:
-                            print_with_color(
-                                kwargs["lamport_clock"],
-                                kwargs["rank"],
-                                f"Received ALCO from BEAR {status.Get_source()}",
-                            )
-                            state = MOREALCO
-                            return state, kwargs
-
-                        # sender is a RABBIT
-                        else:
-                            print_with_color(
-                                kwargs["lamport_clock"],
-                                kwargs["rank"],
-                                f"Received ALCO from RABBIT {status.Get_source()}",
-                            )
-
-                            if own_priority > sender_priority:
-                                pass
-                            else:
-                                comm.send(
-                                    (kwargs["lamport_clock"], message[1:]),
-                                    dest=status.Get_source(),
-                                    tag=OK,
-                                )
-                                print_with_color(
-                                    kwargs["lamport_clock"],
-                                    kwargs["rank"],
-                                    f"Sending OK to {status.Get_source()}",
-                                )
-
-                else:
-                    pass
-
-            # Parsing ENTER message
-            elif status.Get_tag() == ENTER:
-                print_with_color(
-                    kwargs["lamport_clock"],
-                    kwargs["rank"],
-                    f"get ENTER from {status.Get_source()}, message is {message}",
-                )
-
-                if message[1] == kwargs["glade_id"]:
-                    enter_count += 1
+                # As a rabbit i take responsibility for organizing the party from bear
+                if (kwargs["animal_type"] == RABBIT) and (
+                    status.Get_source() >= kwargs["Z"]
+                ):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Received ENTER from {status.Get_source()}. Count is now {enter_count}",
+                        f"Received ALCO from {status.Get_source()} (BEAR), Leaving GLADE state",
                     )
+                    return MOREALCO, kwargs
+
                 else:
-                    pass
+                    comm.send(
+                        (kwargs["lamport_clock"], *message[1:]),
+                        dest=status.Get_source(),
+                        tag=OK,
+                    )
+                    print_with_color(
+                        kwargs["lamport_clock"],
+                        kwargs["rank"],
+                        f"Sending OK to {status.Get_source()}, Leaving GLADE state",
+                    )
+                    return SELFALCO, kwargs
+
+            elif status.Get_tag() == ENTER:
+                nr_glade = message[1]
+                id_enter = status.Get_source()
+                kwargs["parties"][nr_glade] += 1 if id_enter < kwargs["Z"] else 4
+
+            elif status.Get_tag() == END:
+                nr_glade = message[1]
+                kwargs["parties"][nr_glade] = 0
 
             # Ignore other messages
             else:
                 pass
 
-        if enter_count == kwargs["S"]:
+        if kwargs["parties"][kwargs["glade_id"]] == kwargs["S"] - kwargs["animal_type"]:
             print_with_color(
                 kwargs["lamport_clock"],
                 kwargs["rank"],
-                f"Glade is full, I am the organizer",
+                f"Glade is full, I'll try to be the organizer",
             )
-            state = MOREALCO
-            return state, kwargs
+            return MOREALCO, kwargs
