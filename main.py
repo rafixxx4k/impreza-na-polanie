@@ -44,11 +44,12 @@ state_functions = {
     REST: sta.rest,
     WAIT: sta.wait,
     GLADE: sta.glade,
-    # MOREALCO: sta.morealco,
-    # SELFALCO: sta.selfalco,
+    MOREALCO: sta.morealco,
+    SELFALCO: sta.selfalco,
+    HANGOVER: sta.hangover,  # TODO HANGOVER: sta.rest,
 }
 while True:
     state, kwargs = state_functions[state](kwargs)
-    MPI.COMM_WORLD.Barrier()
-    if state == MOREALCO or state == SELFALCO:
-        break
+    # MPI.COMM_WORLD.Barrier()
+    # if state == MOREALCO or state == SELFALCO:
+    #     break

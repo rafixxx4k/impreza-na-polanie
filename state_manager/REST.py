@@ -1,10 +1,6 @@
 from constants import *
+from communication import *
 import random
-from communication.broadcast import broadcast
-from communication.lamport import lamport_clock
-from communication.log import print_with_color
-
-# from main import MPI, comm, rank, size, Z, N, P, S, animal_type
 
 
 def rest(kwargs):
@@ -26,7 +22,7 @@ def rest(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Sending ACK to {status.Get_source()}",
+                    f"Sending ACK to {status.Get_source()} <{message[1]}>",
                 )
 
             elif status.Get_tag() == ENTER:
@@ -47,7 +43,7 @@ def rest(kwargs):
             print_with_color(
                 kwargs["lamport_clock"],
                 kwargs["rank"],
-                f"Sending REQ to all, parties = {kwargs['parties']}",
+                f"Sending REQ <{kwargs['glade_id']}>",
             )
             kwargs["lamport_clock"] = broadcast(
                 kwargs["comm"],

@@ -1,8 +1,6 @@
 # WAIT.py
 from constants import *
-from communication.broadcast import broadcast
-from communication.lamport import lamport_clock
-from communication.log import print_with_color
+from communication import *
 
 
 def wait(kwargs):
@@ -12,7 +10,7 @@ def wait(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f'Entering WAIT for glade: {kwargs["glade_id"]}, parties: {kwargs["parties"]}',
+        f'Entering WAIT <{kwargs["glade_id"]}>',
     )
     queue = []
     own_priority = (kwargs["lamport_clock"], kwargs["rank"])
@@ -22,7 +20,7 @@ def wait(kwargs):
             print_with_color(
                 kwargs["lamport_clock"],
                 kwargs["rank"],
-                f"Back to REST state (Too many animals in the glade).",
+                f"Back to REST state (glade is full). <{kwargs['glade_id']}>",
             )
             for q in queue:
                 kwargs["comm"].send(
@@ -53,7 +51,7 @@ def wait(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Sending ACK to {status.Get_source()}",
+                        f"Sending ACK to {status.Get_source()} <{message[1]}>",
                     )
                 else:
                     queue.append(
@@ -66,7 +64,7 @@ def wait(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Received ACK from {status.Get_source()}. Count is now {cnt}",
+                    f"Received ACK from {status.Get_source()} <{kwargs['glade_id']}>",
                 )
 
             elif status.Get_tag() == ENTER:
@@ -85,7 +83,7 @@ def wait(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f"Leaving WAIT state (Enough permissions received).",
+        f"Leaving WAIT state (Enough permissions) <{kwargs['glade_id']}>",
     )
     kwargs["lamport_clock"] = broadcast(
         kwargs["comm"],
@@ -95,4 +93,5 @@ def wait(kwargs):
         kwargs["rank"],
         kwargs["size"],
     )
+    kwargs["parties"][kwargs["glade_id"]] += kwargs["animal_type"]
     return GLADE, kwargs

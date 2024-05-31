@@ -11,7 +11,7 @@ def selfalco(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f'Entering SEFLALCO {kwargs["glade_id"]}, {kwargs["parties"]}',
+        f'Entering SEFLALCO <{kwargs["glade_id"]}>',
     )
 
     while True:
@@ -31,7 +31,7 @@ def selfalco(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Sending ACK to {status.Get_source()}",
+                    f"Sending ACK to {status.Get_source()} <{message[1]}>",
                 )
 
             elif (status.Get_tag() == ALCO) and (message[1] == kwargs["glade_id"]):
@@ -43,7 +43,7 @@ def selfalco(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Sending OK to {status.Get_source()}",
+                    f"Sending OK to {status.Get_source()} <{kwargs['glade_id']}>",
                 )
 
             elif status.Get_tag() == ENTER:
@@ -58,10 +58,9 @@ def selfalco(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f'Thanking for great party = {kwargs["glade_id"]}',
+                        f'Thanking for great party <{kwargs["glade_id"]}>',
                     )
-                    exit(0)
-                    return REST, kwargs
+                    return HANGOVER, kwargs
 
             # Ignore other messages
             else:

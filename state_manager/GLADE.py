@@ -11,7 +11,7 @@ def glade(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f'Entering GLADE {kwargs["glade_id"]}, {kwargs["parties"]}',
+        f'Entering GLADE <{kwargs["glade_id"]}>',
     )
 
     while True:
@@ -33,14 +33,14 @@ def glade(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Sending ACK to {status.Get_source()}",
+                    f"Sending ACK to {status.Get_source()} <{message[1]}>",
                 )
 
             elif (status.Get_tag() == ALCO) and (message[1] == kwargs["glade_id"]):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"get ALCO from {status.Get_source()}, message is {message}",
+                    f"get ALCO from {status.Get_source()} <{kwargs['glade_id']}>",
                 )
 
                 # As a rabbit i take responsibility for organizing the party from bear
@@ -50,7 +50,7 @@ def glade(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Received ALCO from {status.Get_source()} (BEAR), Leaving GLADE state",
+                        f"Received ALCO from {status.Get_source()} (BEAR), Leaving GLADE state <{kwargs['glade_id']}>",
                     )
                     return MOREALCO, kwargs
 
@@ -63,7 +63,7 @@ def glade(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Sending OK to {status.Get_source()}, Leaving GLADE state",
+                        f"Sending OK to {status.Get_source()}, Leaving GLADE state <{kwargs['glade_id']}>",
                     )
                     return SELFALCO, kwargs
 
@@ -80,10 +80,10 @@ def glade(kwargs):
             else:
                 pass
 
-        if kwargs["parties"][kwargs["glade_id"]] == kwargs["S"] - kwargs["animal_type"]:
+        if kwargs["parties"][kwargs["glade_id"]] == kwargs["S"]:
             print_with_color(
                 kwargs["lamport_clock"],
                 kwargs["rank"],
-                f"Glade is full, I'll try to be the organizer",
+                f"Glade is full, I'll try to be the organizer <{kwargs['glade_id']}>",
             )
             return MOREALCO, kwargs

@@ -12,9 +12,8 @@ def morealco(kwargs):
     print_with_color(
         kwargs["lamport_clock"],
         kwargs["rank"],
-        f'Entering MOREALCO {kwargs["glade_id"]}, {kwargs["parties"]}',
+        f'Entering MOREALCO <{kwargs["glade_id"]}>',
     )
-    own_priority = (kwargs["lamport_clock"], kwargs["rank"])
     kwargs["lamport_clock"] = broadcast(
         comm,
         ALCO,
@@ -23,6 +22,7 @@ def morealco(kwargs):
         kwargs["rank"],
         kwargs["size"],
     )
+    own_priority = (kwargs["lamport_clock"], kwargs["rank"])
     while True:
         if comm.Iprobe(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status):
 
@@ -41,7 +41,7 @@ def morealco(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Sending ACK to {status.Get_source()}",
+                    f"Sending ACK to {status.Get_source()} <{message[1]}>",
                 )
 
             elif (status.Get_tag() == ALCO) and (message[1] == kwargs["glade_id"]):
@@ -53,7 +53,7 @@ def morealco(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Ignoring ALCO as RABIT {status.Get_source()}",
+                        f"Ignoring ALCO as RABIT from {status.Get_source()} <{kwargs['glade_id']}>",
                     )
                 # As a bear i ignore bears with lower priority
                 elif (
@@ -64,7 +64,7 @@ def morealco(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Ignoring ALCO as BEAR {status.Get_source()}",
+                        f"Ignoring ALCO as BEAR from {status.Get_source()} <{kwargs['glade_id']}>",
                     )
                 # Else i have lover priority and i send OK
                 else:
@@ -76,7 +76,7 @@ def morealco(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Sending OK to {status.Get_source()}",
+                        f"Sending OK to {status.Get_source()} <{kwargs['glade_id']}>",
                     )
                     return SELFALCO, kwargs
 
@@ -94,30 +94,30 @@ def morealco(kwargs):
                 print_with_color(
                     kwargs["lamport_clock"],
                     kwargs["rank"],
-                    f"Get OK from {status.Get_source()}",
+                    f"Get OK from {status.Get_source()} <{kwargs['glade_id']}>",
                 )
-                if cnt + kwargs["animal_type"] == kwargs["S"]:
-                    print_with_color(
-                        kwargs["lamport_clock"],
-                        kwargs["rank"],
-                        f"I am organizing party {kwargs['glade_id']}",
-                    )
-                    print_with_color(
-                        kwargs["lamport_clock"],
-                        kwargs["rank"],
-                        f"I am ending the party {kwargs['glade_id']}",
-                    )
-                    broadcast(
-                        comm,
-                        END,
-                        kwargs["lamport_clock"],
-                        (kwargs["glade_id"],),
-                        kwargs["rank"],
-                        kwargs["size"],
-                    )
-                    exit(0)
-                    return REST, kwargs
-
             # Ignore other messages
             else:
                 pass
+
+        # If i have enough permissions i can organize the party
+        if cnt + kwargs["animal_type"] == kwargs["S"]:
+            print_with_color(
+                kwargs["lamport_clock"],
+                kwargs["rank"],
+                f"I am organizing the party <{kwargs['glade_id']}>",
+            )
+            print_with_color(
+                kwargs["lamport_clock"],
+                kwargs["rank"],
+                f"I am ending the party <{kwargs['glade_id']}>",
+            )
+            broadcast(
+                comm,
+                END,
+                kwargs["lamport_clock"],
+                (kwargs["glade_id"],),
+                kwargs["rank"],
+                kwargs["size"],
+            )
+            return HANGOVER, kwargs
