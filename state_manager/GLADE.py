@@ -63,7 +63,7 @@ def glade(kwargs):
                     print_with_color(
                         kwargs["lamport_clock"],
                         kwargs["rank"],
-                        f"Sending OK to {status.Get_source()} (RABBIT), Leaving GLADE state",
+                        f"Sending OK to {status.Get_source()}, Leaving GLADE state",
                     )
                     return SELFALCO, kwargs
 
