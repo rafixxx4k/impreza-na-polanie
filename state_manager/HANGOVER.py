@@ -1,6 +1,7 @@
-from constants import *
-from communication import *
 import random
+
+from communication import *
+from constants import *
 
 
 def hangover(kwargs):

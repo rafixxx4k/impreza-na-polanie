@@ -1,11 +1,11 @@
-from mpi4py import MPI
 import random
 import sys
 import time
 
-from constants import *
+from mpi4py import MPI
 
 import state_manager as sta
+from constants import *
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
