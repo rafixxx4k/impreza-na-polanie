@@ -1,6 +1,4 @@
-import random
 import sys
-import time
 
 from mpi4py import MPI
 

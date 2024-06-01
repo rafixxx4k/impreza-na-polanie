@@ -115,11 +115,18 @@ def morealco(kwargs):
                 kwargs["rank"],
                 f"I am organizing the party <{kwargs['glade_id']}>",
             )
-            print_with_color(
-                kwargs["lamport_clock"],
-                kwargs["rank"],
-                f"I am ending the party <{kwargs['glade_id']}>",
-            )
+            if kwargs["animal_type"] == BEAR:
+                print_with_color(
+                    kwargs["lamport_clock"],
+                    kwargs["rank"],
+                    f"I am a bear orginizing the party, THAT'S NOT FAIR, party's over <{kwargs['glade_id']}>",
+                )
+            else:
+                print_with_color(
+                    kwargs["lamport_clock"],
+                    kwargs["rank"],
+                    f"I am ending the party <{kwargs['glade_id']}>",
+                )
             broadcast(
                 comm,
                 END,

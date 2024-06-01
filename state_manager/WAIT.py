@@ -26,7 +26,7 @@ def wait(kwargs):
             print_with_color(
                 kwargs["lamport_clock"],
                 kwargs["rank"],
-                f"Back to REST state (glade is full). <{kwargs['glade_id']}>",
+                f"Back to REST state (no place on glade). <{kwargs['glade_id']}>",
             )
             for q in queue:
                 comm.send(
