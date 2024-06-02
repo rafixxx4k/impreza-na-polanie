@@ -1,11 +1,9 @@
-from mpi4py import MPI
-import random
 import sys
-import time
 
-from constants import *
+from mpi4py import MPI
 
 import state_manager as sta
+from constants import *
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -38,16 +36,18 @@ kwargs = {
     "glad_id": None,
     "request_id": 0,
     "lamport_clock": 0,
+    "parties": [0 for _ in range(P)],
 }
 state_functions = {
     REST: sta.rest,
     WAIT: sta.wait,
-    # GLADE: sta.glade,
-    # MOREALCO: sta.morealco,
-    # SELFALCO: sta.selfalco,
+    GLADE: sta.glade,
+    MOREALCO: sta.morealco,
+    SELFALCO: sta.selfalco,
+    HANGOVER: sta.hangover,  # TODO HANGOVER: sta.rest,
 }
 while True:
     state, kwargs = state_functions[state](kwargs)
-    MPI.COMM_WORLD.Barrier()
-    if state == GLADE:
-        break
+    # MPI.COMM_WORLD.Barrier()
+    # if state == MOREALCO or state == SELFALCO:
+    #     break
